@@ -1,8 +1,10 @@
 package api.servicesInterface;
 
 
-import api.models.CommandResponse;
+import api.modelsDTO.CreateMatchRequestDTO;
 
 public interface MatchServiceI {
-    CommandResponse<Object> getMatches();
+
+    void createMatch(CreateMatchRequestDTO request);
+
 }

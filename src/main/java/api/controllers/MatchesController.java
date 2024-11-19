@@ -1,32 +1,27 @@
 package api.controllers;
 
-import api.businessLogic.PlayerBL;
-import api.businessLogicInterface.PlayerBLI;
+import api.modelsDTO.CreateMatchRequestDTO;
+import api.servicesInterface.MatchServiceI;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 @RestController
 @RequestMapping("/matches")
 @CrossOrigin()
 public class MatchesController {
 
-    private final PlayerBLI _businessLogic;
+    private final MatchServiceI matchService;
 
     @Autowired
-    public MatchesController(PlayerBL businessLogic) {
-        this._businessLogic = businessLogic;
+    public MatchesController(MatchServiceI matchService) {
+        this.matchService = matchService;
     }
 
-    @GetMapping()
-    public ResponseEntity<Void> getMatches() {
-        return ResponseEntity.ok().build();
+    @PostMapping
+    public ResponseEntity<String> createMatch(@Valid @RequestBody CreateMatchRequestDTO request) {
+        matchService.createMatch(request);
+        return ResponseEntity.ok("Match created successfully");
     }
-
-    @GetMapping("/check")
-    public ResponseEntity<Void> serviceCheck() {
-        return ResponseEntity.ok().build();
-    }
-
 }
 

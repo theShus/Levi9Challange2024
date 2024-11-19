@@ -1,10 +1,14 @@
 package api.servicesInterface;
 
 
-import api.models.CommandResponse;
+import api.modelsDTO.CreateTeamRequestDTO;
+import api.modelsDTO.TeamResponseDTO;
+
+import java.util.UUID;
 
 public interface TeamServiceI {
-    CommandResponse<Object> getTeams();
-    CommandResponse<Object> getTeamById();
 
+    TeamResponseDTO createTeam(CreateTeamRequestDTO request);
+
+    TeamResponseDTO getTeamById(UUID teamId);
 }

@@ -1,36 +1,39 @@
 package api.controllers;
 
-import api.businessLogic.PlayerBL;
-import api.businessLogicInterface.PlayerBLI;
+import api.modelsDTO.CreateTeamRequestDTO;
+import api.modelsDTO.TeamResponseDTO;
+import api.servicesInterface.TeamServiceI;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/teams")
 @CrossOrigin()
 public class TeamsController {
 
-    private final PlayerBLI _businessLogic;
+    private final TeamServiceI teamService;
 
     @Autowired
-    public TeamsController(PlayerBL businessLogic) {
-        this._businessLogic = businessLogic;
+    public TeamsController(TeamServiceI teamService) {
+        this.teamService = teamService;
     }
 
-    @GetMapping()
-    public ResponseEntity<Void> getTeams() {
-        return ResponseEntity.ok().build();
+
+    @PostMapping
+    public ResponseEntity<TeamResponseDTO> createTeam(@Valid @RequestBody CreateTeamRequestDTO request) {
+        TeamResponseDTO response = teamService.createTeam(request);
+        return ResponseEntity.status(200).body(response);
     }
 
-    @GetMapping("{id}")
-    public ResponseEntity<Void> getTeamById(@PathVariable String id) {
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/check")
-    public ResponseEntity<Void> serviceCheck() {
-        return ResponseEntity.ok().build();
+    @GetMapping("/{id}")
+    public ResponseEntity<TeamResponseDTO> getTeamById(@PathVariable UUID id) {
+        TeamResponseDTO response = teamService.getTeamById(id);
+        return ResponseEntity.ok(response);
     }
 
 }
