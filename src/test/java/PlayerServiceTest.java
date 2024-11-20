@@ -1,8 +1,11 @@
 import api.exceptions.DuplicateResourceException;
+import api.exceptions.InvalidInputException;
 import api.exceptions.ResourceNotFoundException;
 import api.models.Player;
+import api.models.Team;
 import api.modelsDTO.CreatePlayerRequestDTO;
 import api.modelsDTO.PlayerResponseDTO;
+import api.modelsDTO.UpdatePlayerRequestDTO;
 import api.repositories.PlayerRepositoryI;
 import api.services.PlayerService;
 import org.junit.jupiter.api.Test;
@@ -186,5 +189,199 @@ public class PlayerServiceTest {
         verify(playerRepository).findAll();
 
         verify(modelMapper, never()).map(any(Player.class), eq(PlayerResponseDTO.class));
+    }
+
+
+    @Test
+    public void testUpdatePlayer_Success() {
+        // Arrange
+        UUID playerId = UUID.randomUUID();
+        UpdatePlayerRequestDTO request = new UpdatePlayerRequestDTO();
+        request.setNickname("UpdatedNickname");
+        request.setWins(15);
+        request.setLosses(7);
+        request.setElo(1550);
+        request.setHoursPlayed(150);
+
+        Player existingPlayer = new Player();
+        existingPlayer.setId(playerId);
+        existingPlayer.setNickname("OldNickname");
+        existingPlayer.setWins(10);
+        existingPlayer.setLosses(5);
+        existingPlayer.setElo(1500);
+        existingPlayer.setHoursPlayed(100);
+        existingPlayer.setTeam(null);
+
+        Player updatedPlayer = new Player();
+        updatedPlayer.setId(playerId);
+        updatedPlayer.setNickname("UpdatedNickname");
+        updatedPlayer.setWins(15);
+        updatedPlayer.setLosses(7);
+        updatedPlayer.setElo(1550);
+        updatedPlayer.setHoursPlayed(150);
+        updatedPlayer.setTeam(null);
+
+        PlayerResponseDTO responseDTO = new PlayerResponseDTO();
+        responseDTO.setId(updatedPlayer.getId());
+        responseDTO.setNickname(updatedPlayer.getNickname());
+        responseDTO.setWins(updatedPlayer.getWins());
+        responseDTO.setLosses(updatedPlayer.getLosses());
+        responseDTO.setElo(updatedPlayer.getElo());
+        responseDTO.setHoursPlayed(updatedPlayer.getHoursPlayed());
+        responseDTO.setTeamId(null);
+
+        when(playerRepository.findById(playerId)).thenReturn(Optional.of(existingPlayer));
+        when(playerRepository.existsByNickname("UpdatedNickname")).thenReturn(false);
+        when(playerRepository.save(existingPlayer)).thenReturn(updatedPlayer);
+        when(modelMapper.map(updatedPlayer, PlayerResponseDTO.class)).thenReturn(responseDTO);
+
+        // Act
+        PlayerResponseDTO result = playerService.updatePlayer(playerId, request);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(updatedPlayer.getId(), result.getId());
+        assertEquals("UpdatedNickname", result.getNickname());
+        assertEquals(15, result.getWins());
+        assertEquals(7, result.getLosses());
+        assertEquals(1550, result.getElo());
+        assertEquals(150, result.getHoursPlayed());
+        assertNull(result.getTeamId());
+
+        // Verify interactions
+        verify(playerRepository).findById(playerId);
+        verify(playerRepository).existsByNickname("UpdatedNickname");
+        verify(playerRepository).save(existingPlayer);
+        verify(modelMapper).map(updatedPlayer, PlayerResponseDTO.class);
+    }
+
+    @Test
+    public void testUpdatePlayer_PlayerNotFound() {
+        // Arrange
+        UUID playerId = UUID.randomUUID();
+        UpdatePlayerRequestDTO request = new UpdatePlayerRequestDTO();
+        request.setNickname("NonExistentPlayer");
+        request.setWins(15);
+        request.setLosses(7);
+        request.setElo(1550);
+        request.setHoursPlayed(150);
+
+        when(playerRepository.findById(playerId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
+            playerService.updatePlayer(playerId, request);
+        });
+
+        assertEquals("Player not found", exception.getMessage());
+
+        // Verify interactions
+        verify(playerRepository).findById(playerId);
+        verify(playerRepository, never()).existsByNickname(anyString());
+        verify(playerRepository, never()).save(any(Player.class));
+        verifyNoInteractions(modelMapper);
+    }
+
+    @Test
+    public void testUpdatePlayer_DuplicateNickname() {
+        // Arrange
+        UUID playerId = UUID.randomUUID();
+        UpdatePlayerRequestDTO request = new UpdatePlayerRequestDTO();
+        request.setNickname("ExistingNickname");
+        request.setWins(15);
+        request.setLosses(7);
+        request.setElo(1550);
+        request.setHoursPlayed(150);
+
+        Player existingPlayer = new Player();
+        existingPlayer.setId(playerId);
+        existingPlayer.setNickname("OldNickname");
+        existingPlayer.setWins(10);
+        existingPlayer.setLosses(5);
+        existingPlayer.setElo(1500);
+        existingPlayer.setHoursPlayed(100);
+        existingPlayer.setTeam(null);
+
+        when(playerRepository.findById(playerId)).thenReturn(Optional.of(existingPlayer));
+        when(playerRepository.existsByNickname("ExistingNickname")).thenReturn(true);
+
+        // Act & Assert
+        DuplicateResourceException exception = assertThrows(DuplicateResourceException.class, () -> {
+            playerService.updatePlayer(playerId, request);
+        });
+
+        assertEquals("Nickname 'ExistingNickname' already exists.", exception.getMessage());
+
+        // Verify interactions
+        verify(playerRepository).findById(playerId);
+        verify(playerRepository).existsByNickname("ExistingNickname");
+        verify(playerRepository, never()).save(any(Player.class));
+        verifyNoInteractions(modelMapper);
+    }
+
+    @Test
+    public void testDeletePlayer_Success() {
+        // Arrange
+        UUID playerId = UUID.randomUUID();
+        Player existingPlayer = new Player();
+        existingPlayer.setId(playerId);
+        existingPlayer.setNickname("PlayerToDelete");
+        existingPlayer.setTeam(null); // Player is not in a team
+
+        when(playerRepository.findById(playerId)).thenReturn(Optional.of(existingPlayer));
+        doNothing().when(playerRepository).delete(existingPlayer);
+
+        // Act
+        assertDoesNotThrow(() -> playerService.deletePlayer(playerId));
+
+        // Assert
+        verify(playerRepository).findById(playerId);
+        verify(playerRepository).delete(existingPlayer);
+    }
+
+    @Test
+    public void testDeletePlayer_PlayerNotFound() {
+        // Arrange
+        UUID playerId = UUID.randomUUID();
+
+        when(playerRepository.findById(playerId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
+            playerService.deletePlayer(playerId);
+        });
+
+        assertEquals("Player not found", exception.getMessage());
+
+        // Verify interactions
+        verify(playerRepository).findById(playerId);
+        verify(playerRepository, never()).delete(any(Player.class));
+    }
+
+    @Test
+    public void testDeletePlayer_PlayerInTeam() {
+        // Arrange
+        UUID playerId = UUID.randomUUID();
+        Team team = new Team();
+        team.setId(UUID.randomUUID());
+        team.setTeamName("TeamA");
+
+        Player existingPlayer = new Player();
+        existingPlayer.setId(playerId);
+        existingPlayer.setNickname("PlayerInTeam");
+        existingPlayer.setTeam(team); // Player is in a team
+
+        when(playerRepository.findById(playerId)).thenReturn(Optional.of(existingPlayer));
+
+        // Act & Assert
+        InvalidInputException exception = assertThrows(InvalidInputException.class, () -> {
+            playerService.deletePlayer(playerId);
+        });
+
+        assertEquals("Cannot delete player who is part of a team.", exception.getMessage());
+
+        // Verify interactions
+        verify(playerRepository).findById(playerId);
+        verify(playerRepository, never()).delete(any(Player.class));
     }
 }

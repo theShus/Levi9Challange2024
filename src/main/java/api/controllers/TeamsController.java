@@ -1,6 +1,7 @@
 package api.controllers;
 
 import api.modelsDTO.CreateTeamRequestDTO;
+import api.modelsDTO.SwapPlayersRequestDTO;
 import api.modelsDTO.TeamResponseDTO;
 import api.servicesInterface.TeamServiceI;
 import jakarta.validation.Valid;
@@ -35,5 +36,16 @@ public class TeamsController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTeam(@PathVariable("id") UUID teamId) {
+        teamService.deleteTeam(teamId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/swap-players")
+    public ResponseEntity<Void> swapPlayers(@Valid @RequestBody SwapPlayersRequestDTO request) {
+        teamService.swapPlayers(request);
+        return ResponseEntity.ok().build();
+    }
 }
 

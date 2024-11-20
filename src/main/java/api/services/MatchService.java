@@ -6,14 +6,17 @@ import api.models.Match;
 import api.models.Player;
 import api.models.Team;
 import api.modelsDTO.CreateMatchRequestDTO;
+import api.modelsDTO.MatchResponseDTO;
 import api.repositories.MatchRepositoryI;
 import api.repositories.PlayerRepositoryI;
 import api.repositories.TeamRepositoryI;
 import api.servicesInterface.MatchServiceI;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MatchService implements MatchServiceI {
@@ -21,12 +24,14 @@ public class MatchService implements MatchServiceI {
     private final TeamRepositoryI teamRepository;
     private final MatchRepositoryI matchRepository;
     private final PlayerRepositoryI playerRepository;
+    private final ModelMapper modelMapper;
 
     @Autowired
-    public MatchService(TeamRepositoryI teamRepository, MatchRepositoryI matchRepository, PlayerRepositoryI playerRepository) {
+    public MatchService(TeamRepositoryI teamRepository, MatchRepositoryI matchRepository, PlayerRepositoryI playerRepository, ModelMapper modelMapper) {
         this.teamRepository = teamRepository;
         this.matchRepository = matchRepository;
         this.playerRepository = playerRepository;
+        this.modelMapper = modelMapper;
     }
 
     @Override
@@ -60,6 +65,20 @@ public class MatchService implements MatchServiceI {
 
         // Update player stats
         updatePlayerStats(team1.getPlayers(), team2.getPlayers(), winningTeam, request.getDuration());
+    }
+
+    // Metoda za dobijanje svih mečeva
+    public List<MatchResponseDTO> getAllMatches() {
+        List<Match> matches = matchRepository.findAll();
+        return matches.stream()
+                .map(match -> {
+                    MatchResponseDTO dto = modelMapper.map(match, MatchResponseDTO.class);
+                    dto.setTeam1Id(match.getTeam1().getId());
+                    dto.setTeam2Id(match.getTeam2().getId());
+                    dto.setWinningTeamId(match.getWinningTeam() != null ? match.getWinningTeam().getId() : null);
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
     private void updatePlayerStats(List<Player> team1Players, List<Player> team2Players, Team winningTeam, int duration) {

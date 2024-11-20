@@ -1,10 +1,12 @@
 package api.services;
 
 import api.exceptions.DuplicateResourceException;
+import api.exceptions.InvalidInputException;
 import api.exceptions.ResourceNotFoundException;
 import api.models.Player;
 import api.modelsDTO.CreatePlayerRequestDTO;
 import api.modelsDTO.PlayerResponseDTO;
+import api.modelsDTO.UpdatePlayerRequestDTO;
 import api.repositories.PlayerRepositoryI;
 import api.servicesInterface.PlayerServiceI;
 import org.modelmapper.ModelMapper;
@@ -70,5 +72,40 @@ public class PlayerService implements PlayerServiceI {
                     return dto;
                 })
                 .collect(Collectors.toList());
+    }
+
+
+    public PlayerResponseDTO updatePlayer(UUID playerId, UpdatePlayerRequestDTO request) {
+        Player existingPlayer = playerRepository.findById(playerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Player not found"));
+
+        if (!existingPlayer.getNickname().equals(request.getNickname()) &&
+                playerRepository.existsByNickname(request.getNickname())) {
+            throw new DuplicateResourceException("Nickname '" + request.getNickname() + "' already exists.");
+        }
+
+        existingPlayer.setNickname(request.getNickname());
+        existingPlayer.setWins(request.getWins());
+        existingPlayer.setLosses(request.getLosses());
+        existingPlayer.setElo(request.getElo());
+        existingPlayer.setHoursPlayed(request.getHoursPlayed());
+
+        Player updatedPlayer = playerRepository.save(existingPlayer);
+
+        PlayerResponseDTO responseDTO = modelMapper.map(updatedPlayer, PlayerResponseDTO.class);
+        responseDTO.setTeamId(updatedPlayer.getTeam() != null ? updatedPlayer.getTeam().getId() : null);
+
+        return responseDTO;
+    }
+
+    public void deletePlayer(UUID playerId) {
+        Player existingPlayer = playerRepository.findById(playerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Player not found"));
+
+        if (existingPlayer.getTeam() != null) {
+            throw new InvalidInputException("Cannot delete player who is part of a team.");
+        }
+
+        playerRepository.delete(existingPlayer);
     }
 }

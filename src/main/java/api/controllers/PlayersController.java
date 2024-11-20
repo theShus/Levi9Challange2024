@@ -2,6 +2,7 @@ package api.controllers;
 
 import api.modelsDTO.CreatePlayerRequestDTO;
 import api.modelsDTO.PlayerResponseDTO;
+import api.modelsDTO.UpdatePlayerRequestDTO;
 import api.servicesInterface.PlayerServiceI;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,20 @@ public class PlayersController {
     public ResponseEntity<List<PlayerResponseDTO>> getAllPlayers() {
         List<PlayerResponseDTO> response = playerService.getAllPlayers();
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<PlayerResponseDTO> updatePlayer(
+            @PathVariable("id") UUID playerId,
+            @Valid @RequestBody UpdatePlayerRequestDTO request) {
+        PlayerResponseDTO updatedPlayer = playerService.updatePlayer(playerId, request);
+        return ResponseEntity.ok(updatedPlayer);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePlayer(@PathVariable("id") UUID playerId) {
+        playerService.deletePlayer(playerId);
+        return ResponseEntity.noContent().build();
     }
 }
 
