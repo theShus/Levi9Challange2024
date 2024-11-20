@@ -15,7 +15,7 @@
 
     <groupId>org.example</groupId>
     <artifactId>Levi9Challange</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
 
     <properties>
         <java.version>17</java.version>
