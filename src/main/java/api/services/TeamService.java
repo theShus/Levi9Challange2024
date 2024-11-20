@@ -1,9 +1,12 @@
 package api.services;
 
+import api.exceptions.DuplicateResourceException;
+import api.exceptions.InvalidInputException;
+import api.exceptions.ResourceNotFoundException;
+import api.models.Player;
 import api.models.Team;
 import api.modelsDTO.CreateTeamRequestDTO;
 import api.modelsDTO.PlayerResponseDTO;
-import api.models.Player;
 import api.modelsDTO.TeamResponseDTO;
 import api.repositories.PlayerRepositoryI;
 import api.repositories.TeamRepositoryI;
@@ -11,9 +14,7 @@ import api.servicesInterface.TeamServiceI;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import api.exceptions.DuplicateResourceException;
-import api.exceptions.InvalidInputException;
-import api.exceptions.ResourceNotFoundException;
+
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -37,11 +38,11 @@ public class TeamService implements TeamServiceI {
     @Override
     public TeamResponseDTO createTeam(CreateTeamRequestDTO request) {
         if (teamRepository.existsByTeamName(request.getTeamName())) {
-            throw new DuplicateResourceException("Team name already exists");
+            throw new DuplicateResourceException("Team name '" + request.getTeamName() + "' already exists.");
         }
 
         if (request.getPlayers().size() != 5) {
-            throw new InvalidInputException("Team must have exactly 5 players");
+            throw new InvalidInputException("Team must have exactly 5 players.");
         }
 
         List<Player> players = playerRepository.findAllById(request.getPlayers());
@@ -52,7 +53,7 @@ public class TeamService implements TeamServiceI {
 
         for (Player player : players) {
             if (player.getTeam() != null) {
-                throw new InvalidInputException("Player " + player.getNickname() + " is already in a team");
+                throw new InvalidInputException("Player '" + player.getNickname() + "' is already in a team.");
             }
         }
 
@@ -81,8 +82,7 @@ public class TeamService implements TeamServiceI {
 
     @Override
     public TeamResponseDTO getTeamById(UUID teamId) {
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new ResourceNotFoundException("Team not found"));
+        Team team = teamRepository.findById(teamId).orElseThrow(() -> new ResourceNotFoundException("Team not found"));
 
         TeamResponseDTO responseDTO = modelMapper.map(team, TeamResponseDTO.class);
         List<PlayerResponseDTO> playerResponseDTOs = team.getPlayers().stream()

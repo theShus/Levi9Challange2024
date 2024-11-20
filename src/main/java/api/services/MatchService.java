@@ -1,5 +1,7 @@
 package api.services;
 
+import api.exceptions.InvalidInputException;
+import api.exceptions.ResourceNotFoundException;
 import api.models.Match;
 import api.models.Player;
 import api.models.Team;
@@ -10,9 +12,6 @@ import api.repositories.TeamRepositoryI;
 import api.servicesInterface.MatchServiceI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import api.exceptions.DuplicateResourceException;
-import api.exceptions.InvalidInputException;
-import api.exceptions.ResourceNotFoundException;
 
 import java.util.List;
 
@@ -62,52 +61,45 @@ public class MatchService implements MatchServiceI {
         // Update player stats
         updatePlayerStats(team1.getPlayers(), team2.getPlayers(), winningTeam, request.getDuration());
     }
+
     private void updatePlayerStats(List<Player> team1Players, List<Player> team2Players, Team winningTeam, int duration) {
         double S_team1, S_team2;
 
-        if (winningTeam == null) {
-            // Draw
+        if (winningTeam == null) {// Draw
             S_team1 = S_team2 = 0.5;
-        } else if (winningTeam.getId().equals(team1Players.get(0).getTeam().getId())) {
-            // Team1 won
+        } else if (winningTeam.getId().equals(team1Players.get(0).getTeam().getId())) {// Team1 won
             S_team1 = 1.0;
             S_team2 = 0.0;
             team1Players.forEach(player -> player.setWins(player.getWins() + 1));
             team2Players.forEach(player -> player.setLosses(player.getLosses() + 1));
-        } else {
-            // Team2 won
+        } else {// Team2 won
             S_team1 = 0.0;
             S_team2 = 1.0;
             team2Players.forEach(player -> player.setWins(player.getWins() + 1));
             team1Players.forEach(player -> player.setLosses(player.getLosses() + 1));
         }
 
-        // Calculate average ELO
+        // Calculate avg elo
         int avgEloTeam1 = team1Players.stream().mapToInt(Player::getElo).sum() / team1Players.size();
         int avgEloTeam2 = team2Players.stream().mapToInt(Player::getElo).sum() / team2Players.size();
 
-        // Update stats for team1 players
-        for (Player player : team1Players) {
+        // Update player elo
+        for (Player player : team1Players)
             updatePlayerElo(player, avgEloTeam2, S_team1, duration);
-        }
-
-        // Update stats for team2 players
-        for (Player player : team2Players) {
+        for (Player player : team2Players)
             updatePlayerElo(player, avgEloTeam1, S_team2, duration);
-        }
     }
 
+    //https://calculator.academy/elo-rating-calculator/
     private void updatePlayerElo(Player player, int opponentAvgElo, double S, int duration) {
-        int R1 = player.getElo();
-        int R2 = opponentAvgElo;
-        double E = 1 / (1 + Math.pow(10, (R2 - R1) / 400.0));
+        double E = 1 / (1 + Math.pow(10, (opponentAvgElo - player.getElo()) / 400.0));
 
         // Determine K factor
         int hoursPlayed = player.getHoursPlayed() + duration;
         int K = getKFactor(hoursPlayed);
 
         // Update ELO
-        int newElo = (int) Math.round(R1 + K * (S - E));
+        int newElo = (int) Math.round(player.getElo() + K * (S - E));
         player.setElo(newElo);
 
         // Update hours played and rating adjustment

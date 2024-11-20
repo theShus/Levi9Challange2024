@@ -1,6 +1,7 @@
 package api.models;
 
 import jakarta.persistence.*;
+
 import java.util.UUID;
 
 @Entity

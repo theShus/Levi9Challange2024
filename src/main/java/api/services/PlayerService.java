@@ -1,8 +1,10 @@
 package api.services;
 
+import api.exceptions.DuplicateResourceException;
+import api.exceptions.ResourceNotFoundException;
+import api.models.Player;
 import api.modelsDTO.CreatePlayerRequestDTO;
 import api.modelsDTO.PlayerResponseDTO;
-import api.models.Player;
 import api.repositories.PlayerRepositoryI;
 import api.servicesInterface.PlayerServiceI;
 import org.modelmapper.ModelMapper;
@@ -12,9 +14,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import api.exceptions.DuplicateResourceException;
-import api.exceptions.InvalidInputException;
-import api.exceptions.ResourceNotFoundException;
 
 @Service
 public class PlayerService implements PlayerServiceI {
@@ -32,7 +31,7 @@ public class PlayerService implements PlayerServiceI {
     @Override
     public PlayerResponseDTO createPlayer(CreatePlayerRequestDTO request) {
         if (playerRepository.existsByNickname(request.getNickname())) {
-            throw new DuplicateResourceException("Nickname already exists");
+            throw new DuplicateResourceException("Nickname '" + request.getNickname() + "' already exists.");
         }
 
         Player player = modelMapper.map(request, Player.class);
@@ -45,15 +44,14 @@ public class PlayerService implements PlayerServiceI {
         Player savedPlayer = playerRepository.save(player);
 
         PlayerResponseDTO responseDTO = modelMapper.map(savedPlayer, PlayerResponseDTO.class);
-        responseDTO.setTeamId(null); // Since team is null at creation
+        responseDTO.setTeamId(null); // team is null at creation
 
         return responseDTO;
     }
 
     @Override
     public PlayerResponseDTO getPlayerById(UUID playerId) {
-        Player player = playerRepository.findById(playerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Player not found"));
+        Player player = playerRepository.findById(playerId).orElseThrow(() -> new ResourceNotFoundException("Player not found"));
 
         PlayerResponseDTO responseDTO = modelMapper.map(player, PlayerResponseDTO.class);
         responseDTO.setTeamId(player.getTeam() != null ? player.getTeam().getId() : null);
