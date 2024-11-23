@@ -48,9 +48,9 @@ public class TeamService implements TeamServiceI {
 
         List<Player> players = playerRepository.findAllById(request.getPlayers());
 
-        if (players.size() != 5) {
-            throw new ResourceNotFoundException("One or more players not found");
-        }
+//        if (players.size() != 5) {
+//            throw new ResourceNotFoundException("One or more players not found");
+//        }
 
         for (Player player : players) {
             if (player.getTeam() != null) {
