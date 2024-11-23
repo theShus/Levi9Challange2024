@@ -35,11 +35,5 @@ public class MatchesController {
         return new ResponseEntity<>(matches, HttpStatus.OK);
     }
 
-    @GetMapping
-    public ResponseEntity<String> TestRoute() {
-        return new ResponseEntity<>("TestRoute", HttpStatus.OK);
-    }
-
-
 }
 
