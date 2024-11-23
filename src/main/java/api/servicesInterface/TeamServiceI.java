@@ -6,6 +6,7 @@ import api.modelsDTO.SwapPlayersRequestDTO;
 import api.modelsDTO.TeamResponseDTO;
 import api.modelsDTO.UpdateTeamRequestDTO;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface TeamServiceI {
@@ -18,5 +19,5 @@ public interface TeamServiceI {
 
     void swapPlayers(SwapPlayersRequestDTO request);
 
-    TeamResponseDTO generateTeams(Integer teamSize);
+    List<TeamResponseDTO> generateTeams(Integer teamSize);
 }
