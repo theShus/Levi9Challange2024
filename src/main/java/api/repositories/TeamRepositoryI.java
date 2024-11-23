@@ -9,6 +9,4 @@ import java.util.UUID;
 public interface TeamRepositoryI extends JpaRepository<Team, UUID> {
 
     boolean existsByTeamName(String teamName);
-
-    Optional<Team> findByTeamName(String teamName);
 }

@@ -17,6 +17,6 @@ public interface PlayerRepositoryI extends JpaRepository<Player, UUID> {
 
     boolean existsByNickname(String nickname);
 
-    @Query("select p from Player p where p.team = null order by p.elo desc limit :playerNumber")
-    Set<Player> findAllForGeneratedTeam(@Param("playerNumber") Integer playerNumber);
+    @Query("select p from Player p where p.team is null order by p.elo desc")
+    Set<Player> findAllForGeneratedTeam();
 }

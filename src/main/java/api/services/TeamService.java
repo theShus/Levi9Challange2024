@@ -192,7 +192,8 @@ public class TeamService implements TeamServiceI {
     @Override
     public List<TeamResponseDTO> generateTeams(Integer teamSize) {
         int playersNumber = teamSize * 2;
-        Set<Player> allPlayersForMatch = playerRepository.findAllForGeneratedTeam(playersNumber);
+        Set<Player> allPlayersForMatch =
+                playerRepository.findAllForGeneratedTeam().stream().limit(playersNumber).collect(Collectors.toSet());
 
         if (allPlayersForMatch.size() < playersNumber)
             throw new RuntimeException("Not enough players for this match");
