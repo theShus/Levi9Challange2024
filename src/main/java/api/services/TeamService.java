@@ -42,9 +42,9 @@ public class TeamService implements TeamServiceI {
             throw new DuplicateResourceException("Team name '" + request.getTeamName() + "' already exists.");
         }
 
-        if (request.getPlayers().size() != 5) {
-            throw new InvalidInputException("Team must have exactly 5 players.");
-        }
+//        if (request.getPlayers().size() != 5) {
+//            throw new InvalidInputException("Team must have exactly 5 players.");
+//        }
 
         List<Player> players = playerRepository.findAllById(request.getPlayers());
 

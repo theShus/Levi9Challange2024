@@ -51,11 +51,16 @@ public class MatchService implements MatchServiceI {
             throw new InvalidInputException("Team1 and Team2 must be different teams");
         }
 
+
         Team team1 = teamRepository.findById(request.getTeam1Id())
                 .orElseThrow(() -> new ResourceNotFoundException("Team 1 not found"));
 
         Team team2 = teamRepository.findById(request.getTeam2Id())
                 .orElseThrow(() -> new ResourceNotFoundException("Team 2 not found"));
+
+        if (team1.getPlayers().size() != team2.getPlayers().size()){
+            throw new InvalidInputException("Team1 and Team2 must have same player count");
+        }
 
         Team winningTeam = null;
         if (request.getWinningTeamId() != null) {
