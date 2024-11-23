@@ -12,6 +12,8 @@ import api.repositories.MatchRepositoryI;
 import api.repositories.PlayerRepositoryI;
 import api.repositories.TeamRepositoryI;
 import api.servicesInterface.MatchServiceI;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,7 @@ public class MatchService implements MatchServiceI {
     private final PlayerRepositoryI playerRepository;
     private final ModelMapper modelMapper;
     private final LambdaInvoker lambdaInvoker;
+    private final ObjectMapper objectMapper;
 
     @Autowired
     public MatchService(TeamRepositoryI teamRepository, MatchRepositoryI matchRepository, PlayerRepositoryI playerRepository, ModelMapper modelMapper) {
@@ -35,6 +38,7 @@ public class MatchService implements MatchServiceI {
         this.playerRepository = playerRepository;
         this.modelMapper = modelMapper;
         this.lambdaInvoker = new LambdaInvoker();
+        this.objectMapper = new ObjectMapper();
     }
 
     @Override
@@ -72,13 +76,20 @@ public class MatchService implements MatchServiceI {
             matchRepository.save(match);
         }
 
+        try {
+            String jsonString = objectMapper.writeValueAsString(match);
+            lambdaInvoker.invokeSendEmailFunction(jsonString);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+
         // Update player stats
         updatePlayerStats(team1.getPlayers(), team2.getPlayers(), winningTeam, request.getDuration());
 
         deleteRandomTeam(team1);
         deleteRandomTeam(team2);
 
-        lambdaInvoker.invokeSendEmailFunction();
     }
 
     // Metoda za dobijanje svih mečeva

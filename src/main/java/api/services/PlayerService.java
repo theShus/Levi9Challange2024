@@ -75,7 +75,7 @@ public class PlayerService implements PlayerServiceI {
     public List<PlayerResponseDTO> getAllPlayers() {
         List<Player> players = playerRepository.findAll();
 
-        lambdaInvoker.invokeSendEmailFunction();
+        lambdaInvoker.invokeSendEmailFunction("This is a test string :)");
 
 
         return players.stream()

@@ -10,18 +10,17 @@ public class LambdaInvoker {
 
     private static final String FUNCTION_ARN = "arn:aws:lambda:eu-central-1:145023105668:function:SendEmailFunction";
 
-    public String invokeSendEmailFunction() {
+    public String invokeSendEmailFunction(String jsonString) {
         // Create AWS Lambda client
         AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
                 .withRegion("eu-central-1")
-                .withCredentials(new DefaultAWSCredentialsProviderChain())
                 .build();
 
-        // Prepare the invocation request
+        // Prepare the invocation request with the JSON string as payload
         InvokeRequest invokeRequest = new InvokeRequest()
                 .withFunctionName(FUNCTION_ARN)
                 .withInvocationType(InvocationType.RequestResponse)
-                .withPayload("{}"); // Sending an empty JSON payload
+                .withPayload(jsonString);
 
         try {
             // Invoke the Lambda function
