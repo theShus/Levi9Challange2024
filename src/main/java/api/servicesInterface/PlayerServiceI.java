@@ -19,4 +19,5 @@ public interface PlayerServiceI {
     PlayerResponseDTO updatePlayer(UUID playerId, UpdatePlayerRequestDTO request);
 
     void deletePlayer(UUID playerId);
+
 }

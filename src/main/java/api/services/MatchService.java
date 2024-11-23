@@ -143,4 +143,9 @@ public class MatchService implements MatchServiceI {
         }
     }
 
+    public void deleteData() {
+        List<Match> matches = matchRepository.findAll();
+        matchRepository.deleteAll(matches);
+    }
+
 }
