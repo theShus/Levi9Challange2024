@@ -188,4 +188,9 @@ public class TeamService implements TeamServiceI {
         playerRepository.saveAll(team1PlayersToSwap);
         playerRepository.saveAll(team2PlayersToSwap);
     }
+
+    public void deleteData() {
+        List<Team> teams = teamRepository.findAll();
+        teamRepository.deleteAll(teams);
+    }
 }

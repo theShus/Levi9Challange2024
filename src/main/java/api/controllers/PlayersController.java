@@ -3,6 +3,7 @@ package api.controllers;
 import api.modelsDTO.CreatePlayerRequestDTO;
 import api.modelsDTO.PlayerResponseDTO;
 import api.modelsDTO.UpdatePlayerRequestDTO;
+import api.services.DataService;
 import api.servicesInterface.PlayerServiceI;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +19,12 @@ import java.util.UUID;
 public class PlayersController {
 
     private final PlayerServiceI playerService;
+    private final DataService dataService;
 
     @Autowired
-    public PlayersController(PlayerServiceI playerService) {
+    public PlayersController(PlayerServiceI playerService, DataService dataService) {
         this.playerService = playerService;
+        this.dataService = dataService;
     }
 
 
@@ -54,6 +57,12 @@ public class PlayersController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlayer(@PathVariable("id") UUID playerId) {
         playerService.deletePlayer(playerId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping()
+    public ResponseEntity<Void> deleteData() {
+        dataService.deleteAllData();
         return ResponseEntity.noContent().build();
     }
 }

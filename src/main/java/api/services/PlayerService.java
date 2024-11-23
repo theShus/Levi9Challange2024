@@ -108,4 +108,10 @@ public class PlayerService implements PlayerServiceI {
 
         playerRepository.delete(existingPlayer);
     }
+
+
+    public void deleteData() {
+        List<Player> players = playerRepository.findAll();
+        playerRepository.deleteAll(players);
+    }
 }
