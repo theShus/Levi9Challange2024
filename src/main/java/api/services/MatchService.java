@@ -1,5 +1,6 @@
 package api.services;
 
+import api.config.LambdaInvoker;
 import api.exceptions.InvalidInputException;
 import api.exceptions.ResourceNotFoundException;
 import api.models.Match;
@@ -25,6 +26,7 @@ public class MatchService implements MatchServiceI {
     private final MatchRepositoryI matchRepository;
     private final PlayerRepositoryI playerRepository;
     private final ModelMapper modelMapper;
+    private final LambdaInvoker lambdaInvoker;
 
     @Autowired
     public MatchService(TeamRepositoryI teamRepository, MatchRepositoryI matchRepository, PlayerRepositoryI playerRepository, ModelMapper modelMapper) {
@@ -32,6 +34,7 @@ public class MatchService implements MatchServiceI {
         this.matchRepository = matchRepository;
         this.playerRepository = playerRepository;
         this.modelMapper = modelMapper;
+        this.lambdaInvoker = new LambdaInvoker();
     }
 
     @Override
@@ -75,6 +78,7 @@ public class MatchService implements MatchServiceI {
         deleteRandomTeam(team1);
         deleteRandomTeam(team2);
 
+        lambdaInvoker.invokeSendEmailFunction();
     }
 
     // Metoda za dobijanje svih mečeva

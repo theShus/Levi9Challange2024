@@ -1,5 +1,6 @@
 package api.services;
 
+import api.config.LambdaInvoker;
 import api.exceptions.DuplicateResourceException;
 import api.exceptions.InvalidInputException;
 import api.exceptions.ResourceNotFoundException;
@@ -26,12 +27,16 @@ public class PlayerService implements PlayerServiceI {
     private final PlayerRepositoryI playerRepository;
     private final ModelMapper modelMapper;
     private final TeamRepositoryI teamRepository;
+    private final LambdaInvoker lambdaInvoker;
+
 
     @Autowired
     public PlayerService(PlayerRepositoryI playerRepository, ModelMapper modelMapper, TeamRepositoryI teamRepository) {
         this.playerRepository = playerRepository;
         this.modelMapper = modelMapper;
         this.teamRepository = teamRepository;
+        this.lambdaInvoker = new LambdaInvoker();
+
     }
 
 
@@ -70,6 +75,9 @@ public class PlayerService implements PlayerServiceI {
     public List<PlayerResponseDTO> getAllPlayers() {
         List<Player> players = playerRepository.findAll();
 
+        lambdaInvoker.invokeSendEmailFunction();
+
+
         return players.stream()
                 .map(player -> {
                     PlayerResponseDTO dto = modelMapper.map(player, PlayerResponseDTO.class);
@@ -77,6 +85,7 @@ public class PlayerService implements PlayerServiceI {
                     return dto;
                 })
                 .collect(Collectors.toList());
+
     }
 
 
