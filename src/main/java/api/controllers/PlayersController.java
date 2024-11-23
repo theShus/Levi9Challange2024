@@ -60,6 +60,12 @@ public class PlayersController {
         return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("/{player_id}/leave_team")
+    public ResponseEntity<PlayerResponseDTO> leaveTeam(@PathVariable("player_id") UUID playerId) {
+        PlayerResponseDTO playerDTO = playerService.leaveTeam(playerId);
+        return ResponseEntity.ok(playerDTO);
+    }
+
     @DeleteMapping()
     public ResponseEntity<Void> deleteData() {
         dataService.deleteAllData();

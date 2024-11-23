@@ -4,11 +4,14 @@ import api.exceptions.DuplicateResourceException;
 import api.exceptions.InvalidInputException;
 import api.exceptions.ResourceNotFoundException;
 import api.models.Player;
+import api.models.Team;
 import api.modelsDTO.CreatePlayerRequestDTO;
 import api.modelsDTO.PlayerResponseDTO;
 import api.modelsDTO.UpdatePlayerRequestDTO;
 import api.repositories.PlayerRepositoryI;
+import api.repositories.TeamRepositoryI;
 import api.servicesInterface.PlayerServiceI;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,11 +25,13 @@ public class PlayerService implements PlayerServiceI {
 
     private final PlayerRepositoryI playerRepository;
     private final ModelMapper modelMapper;
+    private final TeamRepositoryI teamRepository;
 
     @Autowired
-    public PlayerService(PlayerRepositoryI playerRepository, ModelMapper modelMapper) {
+    public PlayerService(PlayerRepositoryI playerRepository, ModelMapper modelMapper, TeamRepositoryI teamRepository) {
         this.playerRepository = playerRepository;
         this.modelMapper = modelMapper;
+        this.teamRepository = teamRepository;
     }
 
 
@@ -41,7 +46,7 @@ public class PlayerService implements PlayerServiceI {
         player.setLosses(0);
         player.setElo(0);
         player.setHoursPlayed(0);
-        player.setRatingAdjustment(50);
+        player.setRatingAdjustment(null);
 
         Player savedPlayer = playerRepository.save(player);
 
@@ -109,6 +114,26 @@ public class PlayerService implements PlayerServiceI {
         playerRepository.delete(existingPlayer);
     }
 
+
+    @Transactional
+    public PlayerResponseDTO leaveTeam(UUID playerId) {
+        Player player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Player not found"));
+
+        Team team = player.getTeam();
+
+        if (team != null) {
+            team.getPlayers().remove(player);
+            player.setTeam(null);
+
+            teamRepository.save(team);
+        } else {
+            player.setTeam(null);
+        }
+        playerRepository.save(player);
+
+        return new PlayerResponseDTO(player);
+    }
 
     public void deleteData() {
         List<Player> players = playerRepository.findAll();
