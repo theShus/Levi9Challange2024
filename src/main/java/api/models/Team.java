@@ -16,6 +16,17 @@ public class Team {
     @Column(unique = true, nullable = false)
     private String teamName;
 
+    @Column(nullable = false, columnDefinition = "BOOLEAN default false")
+    private boolean isRandom = false;
+
+    public boolean isRandom() {
+        return isRandom;
+    }
+
+    public void setRandom(boolean random) {
+        isRandom = random;
+    }
+
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL)
     private List<Player> players;
 

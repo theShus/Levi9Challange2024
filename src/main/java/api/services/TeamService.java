@@ -213,6 +213,7 @@ public class TeamService implements TeamServiceI {
         Team team = new Team();
         team.setTeamName(UUID.randomUUID().toString());
         team.setPlayers(players);
+        team.setRandom(true);
 
         for (Player player : players) {
             player.setTeam(team);

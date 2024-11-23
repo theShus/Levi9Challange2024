@@ -65,10 +65,16 @@ public class MatchService implements MatchServiceI {
         match.setWinningTeam(winningTeam);
         match.setDuration(request.getDuration());
 
-        matchRepository.save(match);
+        if (!team1.isRandom() && !team2.isRandom()) {
+            matchRepository.save(match);
+        }
 
         // Update player stats
         updatePlayerStats(team1.getPlayers(), team2.getPlayers(), winningTeam, request.getDuration());
+
+        deleteRandomTeam(team1);
+        deleteRandomTeam(team2);
+
     }
 
     // Metoda za dobijanje svih mečeva
@@ -150,6 +156,12 @@ public class MatchService implements MatchServiceI {
     public void deleteData() {
         List<Match> matches = matchRepository.findAll();
         matchRepository.deleteAll(matches);
+    }
+
+    private void deleteRandomTeam(Team team) {
+        if (team.isRandom()) {
+            teamRepository.delete(team);
+        }
     }
 
 }
