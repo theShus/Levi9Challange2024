@@ -1,6 +1,7 @@
 package api.services;
 
-import api.config.LambdaInvoker;
+import api.config.BucketLambdaInvoker;
+import api.config.EmailLambdaInvoker;
 import api.exceptions.DuplicateResourceException;
 import api.exceptions.InvalidInputException;
 import api.exceptions.ResourceNotFoundException;
@@ -27,7 +28,8 @@ public class PlayerService implements PlayerServiceI {
     private final PlayerRepositoryI playerRepository;
     private final ModelMapper modelMapper;
     private final TeamRepositoryI teamRepository;
-    private final LambdaInvoker lambdaInvoker;
+    private final EmailLambdaInvoker emailLambdaInvoker;
+    private final BucketLambdaInvoker bucketLambdaInvoker;
 
 
     @Autowired
@@ -35,7 +37,9 @@ public class PlayerService implements PlayerServiceI {
         this.playerRepository = playerRepository;
         this.modelMapper = modelMapper;
         this.teamRepository = teamRepository;
-        this.lambdaInvoker = new LambdaInvoker();
+        this.emailLambdaInvoker = new EmailLambdaInvoker();
+        this.bucketLambdaInvoker = new BucketLambdaInvoker();
+
 
     }
 
@@ -75,7 +79,8 @@ public class PlayerService implements PlayerServiceI {
     public List<PlayerResponseDTO> getAllPlayers() {
         List<Player> players = playerRepository.findAll();
 
-        lambdaInvoker.invokeSendEmailFunction("This is a test string :)");
+        emailLambdaInvoker.invokeSendEmailFunction("This is a test string :)");
+        bucketLambdaInvoker.invokeStoreStringDataFunction("Test string store :D");
 
 
         return players.stream()

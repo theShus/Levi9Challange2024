@@ -1,6 +1,7 @@
 package api.services;
 
-import api.config.LambdaInvoker;
+import api.config.BucketLambdaInvoker;
+import api.config.EmailLambdaInvoker;
 import api.exceptions.InvalidInputException;
 import api.exceptions.ResourceNotFoundException;
 import api.models.Match;
@@ -28,7 +29,8 @@ public class MatchService implements MatchServiceI {
     private final MatchRepositoryI matchRepository;
     private final PlayerRepositoryI playerRepository;
     private final ModelMapper modelMapper;
-    private final LambdaInvoker lambdaInvoker;
+    private final EmailLambdaInvoker emailLambdaInvoker;
+    private final BucketLambdaInvoker bucketLambdaInvoker;
     private final ObjectMapper objectMapper;
 
     @Autowired
@@ -37,7 +39,8 @@ public class MatchService implements MatchServiceI {
         this.matchRepository = matchRepository;
         this.playerRepository = playerRepository;
         this.modelMapper = modelMapper;
-        this.lambdaInvoker = new LambdaInvoker();
+        this.emailLambdaInvoker = new EmailLambdaInvoker();
+        this.bucketLambdaInvoker = new BucketLambdaInvoker();
         this.objectMapper = new ObjectMapper();
     }
 
@@ -83,7 +86,8 @@ public class MatchService implements MatchServiceI {
 
         try {
             String jsonString = objectMapper.writeValueAsString(match);
-            lambdaInvoker.invokeSendEmailFunction(jsonString);
+            emailLambdaInvoker.invokeSendEmailFunction(jsonString);
+            bucketLambdaInvoker.invokeStoreStringDataFunction(jsonString);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

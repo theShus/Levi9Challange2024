@@ -6,7 +6,7 @@ import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.*;
 import java.nio.charset.StandardCharsets;
 
-public class LambdaInvoker {
+public class EmailLambdaInvoker {
 
     private static final String FUNCTION_ARN = "arn:aws:lambda:eu-central-1:145023105668:function:SendEmailFunction";
 
