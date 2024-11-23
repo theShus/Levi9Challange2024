@@ -34,5 +34,6 @@ public class MatchesController {
         List<MatchResponseDTO> matches = matchService.getAllMatches();
         return new ResponseEntity<>(matches, HttpStatus.OK);
     }
+
 }
 

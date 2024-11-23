@@ -11,7 +11,7 @@ public class CreateTeamRequestDTO {
     @NotBlank(message = "Team name is mandatory")
     private String teamName;
 
-    @Size(min = 5, max = 5, message = "Team must have exactly 5 players")
+    //@Size(min = 5, max = 5, message = "Team must have exactly 5 players")
     private List<UUID> players;
 
     public String getTeamName() {

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -17,10 +18,12 @@ import java.util.UUID;
 public class TeamsController {
 
     private final TeamServiceI teamService;
+    private final TeamServiceI teamServiceI;
 
     @Autowired
-    public TeamsController(TeamServiceI teamService) {
+    public TeamsController(TeamServiceI teamService, TeamServiceI teamServiceI) {
         this.teamService = teamService;
+        this.teamServiceI = teamServiceI;
     }
 
 
@@ -46,6 +49,12 @@ public class TeamsController {
     public ResponseEntity<Void> swapPlayers(@Valid @RequestBody SwapPlayersRequestDTO request) {
         teamService.swapPlayers(request);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/generate_teams")
+    public ResponseEntity<List<TeamResponseDTO>> generateTeams(@RequestParam Integer teamSize) {
+        List<TeamResponseDTO> teamResponseDTOS = teamServiceI.generateTeams(teamSize);
+        return ResponseEntity.ok(teamResponseDTOS);
     }
 }
 

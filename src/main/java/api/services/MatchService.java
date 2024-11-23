@@ -1,5 +1,7 @@
 package api.services;
 
+import api.config.BucketLambdaInvoker;
+import api.config.EmailLambdaInvoker;
 import api.exceptions.InvalidInputException;
 import api.exceptions.ResourceNotFoundException;
 import api.models.Match;
@@ -11,6 +13,8 @@ import api.repositories.MatchRepositoryI;
 import api.repositories.PlayerRepositoryI;
 import api.repositories.TeamRepositoryI;
 import api.servicesInterface.MatchServiceI;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +29,9 @@ public class MatchService implements MatchServiceI {
     private final MatchRepositoryI matchRepository;
     private final PlayerRepositoryI playerRepository;
     private final ModelMapper modelMapper;
+    private final EmailLambdaInvoker emailLambdaInvoker;
+    private final BucketLambdaInvoker bucketLambdaInvoker;
+    private final ObjectMapper objectMapper;
 
     @Autowired
     public MatchService(TeamRepositoryI teamRepository, MatchRepositoryI matchRepository, PlayerRepositoryI playerRepository, ModelMapper modelMapper) {
@@ -32,6 +39,9 @@ public class MatchService implements MatchServiceI {
         this.matchRepository = matchRepository;
         this.playerRepository = playerRepository;
         this.modelMapper = modelMapper;
+        this.emailLambdaInvoker = new EmailLambdaInvoker();
+        this.bucketLambdaInvoker = new BucketLambdaInvoker();
+        this.objectMapper = new ObjectMapper();
     }
 
     @Override
@@ -40,11 +50,20 @@ public class MatchService implements MatchServiceI {
             throw new InvalidInputException("Duration must be at least 1");
         }
 
+        if (request.getTeam1Id().equals(request.getTeam2Id())) {
+            throw new InvalidInputException("Team1 and Team2 must be different teams");
+        }
+
+
         Team team1 = teamRepository.findById(request.getTeam1Id())
                 .orElseThrow(() -> new ResourceNotFoundException("Team 1 not found"));
 
         Team team2 = teamRepository.findById(request.getTeam2Id())
                 .orElseThrow(() -> new ResourceNotFoundException("Team 2 not found"));
+
+        if (team1.getPlayers().size() != team2.getPlayers().size()){
+            throw new InvalidInputException("Team1 and Team2 must have same player count");
+        }
 
         Team winningTeam = null;
         if (request.getWinningTeamId() != null) {
@@ -61,10 +80,25 @@ public class MatchService implements MatchServiceI {
         match.setWinningTeam(winningTeam);
         match.setDuration(request.getDuration());
 
-        matchRepository.save(match);
+        if (!team1.isRandom() && !team2.isRandom()) {
+            matchRepository.save(match);
+        }
+
+        try {
+            String jsonString = objectMapper.writeValueAsString(match);
+            emailLambdaInvoker.invokeSendEmailFunction(jsonString);
+            bucketLambdaInvoker.invokeStoreStringDataFunction(jsonString);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
 
         // Update player stats
         updatePlayerStats(team1.getPlayers(), team2.getPlayers(), winningTeam, request.getDuration());
+
+        deleteRandomTeam(team1);
+        deleteRandomTeam(team2);
+
     }
 
     // Metoda za dobijanje svih mečeva
@@ -140,6 +174,17 @@ public class MatchService implements MatchServiceI {
             return 20;
         } else {
             return 10;
+        }
+    }
+
+    public void deleteData() {
+        List<Match> matches = matchRepository.findAll();
+        matchRepository.deleteAll(matches);
+    }
+
+    private void deleteRandomTeam(Team team) {
+        if (team.isRandom()) {
+            teamRepository.delete(team);
         }
     }
 

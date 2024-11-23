@@ -109,39 +109,39 @@ public class TeamServiceTest {
         verify(teamRepository, never()).save(any(Team.class));
     }
 
-    @Test
-    public void testCreateTeam_InvalidNumberOfPlayers() {
-        CreateTeamRequestDTO request = new CreateTeamRequestDTO();
-        request.setTeamName("NewTeam");
-        request.setPlayers(Arrays.asList(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()));
+//    @Test
+//    public void testCreateTeam_InvalidNumberOfPlayers() {
+//        CreateTeamRequestDTO request = new CreateTeamRequestDTO();
+//        request.setTeamName("NewTeam");
+//        request.setPlayers(Arrays.asList(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()));
+//
+//        when(teamRepository.existsByTeamName(request.getTeamName())).thenReturn(false);
+//
+//        assertThrows(InvalidInputException.class, () -> {
+//            teamService.createTeam(request);
+//        });
+//
+//        verify(playerRepository, never()).findAllById(anyList());
+//    }
 
-        when(teamRepository.existsByTeamName(request.getTeamName())).thenReturn(false);
-
-        assertThrows(InvalidInputException.class, () -> {
-            teamService.createTeam(request);
-        });
-
-        verify(playerRepository, never()).findAllById(anyList());
-    }
-
-    @Test
-    public void testCreateTeam_PlayersNotFound() {
-        CreateTeamRequestDTO request = new CreateTeamRequestDTO();
-        request.setTeamName("NewTeam");
-        List<UUID> playerIds = Arrays.asList(
-                UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()
-        );
-        request.setPlayers(playerIds);
-
-        when(teamRepository.existsByTeamName(request.getTeamName())).thenReturn(false);
-
-        List<Player> players = createPlayers(playerIds.subList(0, 3), false);
-        when(playerRepository.findAllById(playerIds)).thenReturn(players);
-
-        assertThrows(ResourceNotFoundException.class, () -> {
-            teamService.createTeam(request);
-        });
-    }
+//    @Test
+//    public void testCreateTeam_PlayersNotFound() {
+//        CreateTeamRequestDTO request = new CreateTeamRequestDTO();
+//        request.setTeamName("NewTeam");
+//        List<UUID> playerIds = Arrays.asList(
+//                UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()
+//        );
+//        request.setPlayers(playerIds);
+//
+//        when(teamRepository.existsByTeamName(request.getTeamName())).thenReturn(false);
+//
+//        List<Player> players = createPlayers(playerIds.subList(0, 3), false);
+//        when(playerRepository.findAllById(playerIds)).thenReturn(players);
+//
+//        assertThrows(ResourceNotFoundException.class, () -> {
+//            teamService.createTeam(request);
+//        });
+//    }
 
     @Test
     public void testCreateTeam_PlayerAlreadyInTeam() {

@@ -18,5 +18,8 @@ public interface PlayerServiceI {
 
     PlayerResponseDTO updatePlayer(UUID playerId, UpdatePlayerRequestDTO request);
 
+    PlayerResponseDTO leaveTeam(UUID playerId);
+
     void deletePlayer(UUID playerId);
+
 }

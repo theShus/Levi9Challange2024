@@ -3,9 +3,11 @@ package api.controllers;
 import api.modelsDTO.CreatePlayerRequestDTO;
 import api.modelsDTO.PlayerResponseDTO;
 import api.modelsDTO.UpdatePlayerRequestDTO;
+import api.services.DataService;
 import api.servicesInterface.PlayerServiceI;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,10 +20,12 @@ import java.util.UUID;
 public class PlayersController {
 
     private final PlayerServiceI playerService;
+    private final DataService dataService;
 
     @Autowired
-    public PlayersController(PlayerServiceI playerService) {
+    public PlayersController(PlayerServiceI playerService, DataService dataService) {
         this.playerService = playerService;
+        this.dataService = dataService;
     }
 
 
@@ -55,6 +59,18 @@ public class PlayersController {
     public ResponseEntity<Void> deletePlayer(@PathVariable("id") UUID playerId) {
         playerService.deletePlayer(playerId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{player_id}/leave_team")
+    public ResponseEntity<PlayerResponseDTO> leaveTeam(@PathVariable("player_id") UUID playerId) {
+        PlayerResponseDTO playerDTO = playerService.leaveTeam(playerId);
+        return ResponseEntity.ok(playerDTO);
+    }
+
+    @DeleteMapping()
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteData() {
+        dataService.deleteAllData();
     }
 }
 
