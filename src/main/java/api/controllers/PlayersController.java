@@ -7,6 +7,7 @@ import api.services.DataService;
 import api.servicesInterface.PlayerServiceI;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -67,9 +68,9 @@ public class PlayersController {
     }
 
     @DeleteMapping()
-    public ResponseEntity<Void> deleteData() {
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteData() {
         dataService.deleteAllData();
-        return ResponseEntity.noContent().build();
     }
 }
 
