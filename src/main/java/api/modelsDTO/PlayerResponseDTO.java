@@ -1,5 +1,7 @@
 package api.modelsDTO;
 
+import api.models.Player;
+
 import java.util.UUID;
 
 public class PlayerResponseDTO {
@@ -12,6 +14,20 @@ public class PlayerResponseDTO {
     private int hoursPlayed;
     private UUID teamId;
     private Integer ratingAdjustment;
+
+    public PlayerResponseDTO() {
+    }
+
+    public PlayerResponseDTO(Player player) {
+        this.id = player.getId();
+        this.nickname = player.getNickname();
+        this.wins = player.getWins();
+        this.losses = player.getLosses();
+        this.elo = player.getElo();
+        this.hoursPlayed = player.getHoursPlayed();
+        this.teamId = player.getTeam() != null ? player.getTeam().getId() : null;
+        this.ratingAdjustment = player.getRatingAdjustment();
+    }
 
     public UUID getId() {
         return id;

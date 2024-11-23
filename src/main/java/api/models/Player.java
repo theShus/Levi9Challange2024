@@ -24,7 +24,7 @@ public class Player {
     @JoinColumn(name = "team_id")
     private Team team;
 
-    private Integer ratingAdjustment = 50; // Starting ratingAdjustment
+    private Integer ratingAdjustment = null; // Starting ratingAdjustment
 
 
     public UUID getId() {

@@ -64,6 +64,7 @@ public class TeamService implements TeamServiceI {
 
         for (Player player : players) {
             player.setTeam(team);
+            player.setRatingAdjustment(50);
         }
 
         Team savedTeam = teamRepository.save(team);
