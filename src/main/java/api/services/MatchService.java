@@ -40,6 +40,10 @@ public class MatchService implements MatchServiceI {
             throw new InvalidInputException("Duration must be at least 1");
         }
 
+        if (request.getTeam1Id().equals(request.getTeam2Id())) {
+            throw new InvalidInputException("Team1 and Team2 must be different teams");
+        }
+
         Team team1 = teamRepository.findById(request.getTeam1Id())
                 .orElseThrow(() -> new ResourceNotFoundException("Team 1 not found"));
 
