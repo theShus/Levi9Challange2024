@@ -34,5 +34,12 @@ public class MatchesController {
         List<MatchResponseDTO> matches = matchService.getAllMatches();
         return new ResponseEntity<>(matches, HttpStatus.OK);
     }
+
+    @GetMapping
+    public ResponseEntity<String> TestRoute() {
+        return new ResponseEntity<>("TestRoute", HttpStatus.OK);
+    }
+
+
 }
 
