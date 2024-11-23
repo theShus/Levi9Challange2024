@@ -15,8 +15,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -189,8 +188,53 @@ public class TeamService implements TeamServiceI {
         playerRepository.saveAll(team2PlayersToSwap);
     }
 
+    @Override
+    public TeamResponseDTO generateTeams(Integer teamSize) {
+        int playersNumber = teamSize * 2;
+        Set<Player> allPlayersForMatch = playerRepository.findAllForGeneratedTeam(playersNumber);
+
+        if (allPlayersForMatch.size() < playersNumber)
+            throw new RuntimeException("Not enough players for this match");
+
+
+
+
+        return null;
+    }
+
     public void deleteData() {
         List<Team> teams = teamRepository.findAll();
         teamRepository.deleteAll(teams);
+    }
+
+    private void generateTeams(Set<Player> players) {
+        List<Player> listOfPlayer = new ArrayList<>(players);
+
+        Set<Player> team1 = new HashSet<>();
+        Set<Player> team2 = new HashSet<>();
+
+        int totalPlayers = listOfPlayer.size();
+        int N = totalPlayers / 2;
+
+        int left = 0;
+        int right = totalPlayers - 1;
+
+        while (left <= right) {
+            team1.add(listOfPlayer.get(left));
+            if (left != right) {
+                team1.add(listOfPlayer.get(right));
+            }
+            left++;
+            right--;
+
+            if (left <= right) {
+                team2.add(listOfPlayer.get(left));
+                if (left != right) {
+                    team2.add(listOfPlayer.get(right));
+                }
+                left++;
+                right--;
+            }
+        }
     }
 }
